@@ -29,4 +29,8 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+    dependencies {
+        compile 'com.google.firebase:firebase-core:10.2.1'
+        compile 'com.google.firebase:firebase-messaging:10.2.4'
+    }
 }
