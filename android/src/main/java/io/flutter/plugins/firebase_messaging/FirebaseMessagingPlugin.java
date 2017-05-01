@@ -24,6 +24,8 @@ public class FirebaseMessagingPlugin extends BroadcastReceiver implements Method
   private final FlutterActivity activity;
   private final MethodChannel channel;
 
+  private static final String CLICK_ACTION_VALUE = "FLUTTER_NOTIFICATION_CLICK";
+
   public static FirebaseMessagingPlugin register(FlutterActivity activity) {
     return new FirebaseMessagingPlugin(activity);
   }
@@ -71,7 +73,8 @@ public class FirebaseMessagingPlugin extends BroadcastReceiver implements Method
   }
 
   private void sendMessageFromIntent(String method, Intent intent) {
-    if (intent.getAction().equals("NOTIFICATION_CLICK")) {
+    if (CLICK_ACTION_VALUE.equals(intent.getAction())
+        || CLICK_ACTION_VALUE.equals(intent.getStringExtra("click_action"))) {
       Map<String, String> message = new HashMap<>();
       for (String key : intent.getExtras().keySet()) {
         message.put(key, intent.getStringExtra(key));
