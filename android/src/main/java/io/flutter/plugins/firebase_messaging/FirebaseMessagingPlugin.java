@@ -16,6 +16,8 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import java.util.HashMap;
+import java.util.Map;
 
 /** FirebaseMessagingPlugin */
 public class FirebaseMessagingPlugin extends BroadcastReceiver implements MethodCallHandler {
@@ -57,9 +59,24 @@ public class FirebaseMessagingPlugin extends BroadcastReceiver implements Method
   public void onMethodCall(MethodCall call, Result result) {
     if (call.method.equals("configure")) {
       FlutterFirebaseInstanceIDService.broadcastToken(activity);
+      sendMessageFromIntent("onLaunch", activity.getIntent());
       result.success(null);
     } else {
       result.notImplemented();
+    }
+  }
+
+  public void onNewIntent(Intent intent) {
+    sendMessageFromIntent("onResume", intent);
+  }
+
+  private void sendMessageFromIntent(String method, Intent intent) {
+    if (intent.getAction().equals("NOTIFICATION_CLICK")) {
+      Map<String, String> message = new HashMap<>();
+      for (String key : intent.getExtras().keySet()) {
+        message.put(key, intent.getStringExtra(key));
+      }
+      channel.invokeMethod(method, message);
     }
   }
 }
