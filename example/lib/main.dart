@@ -123,9 +123,18 @@ class _PushMessagingExampleState extends State<PushMessagingExample> {
   void initState() {
     super.initState();
     _firebaseMessaging.configure(
-      onMessage: _showItemDialog,
-      onLaunch: _navigateToItemDetail,
-      onResume: _navigateToItemDetail,
+      onMessage: (Map<String, dynamic> message) {
+        print("onMessage: $message");
+        _showItemDialog(message);
+      },
+      onLaunch: (Map<String, dynamic> message) {
+        print("onLaunch: $message");
+        _navigateToItemDetail(message);
+      },
+      onResume: (Map<String, dynamic> message) {
+        print("onResume: $message");
+        _navigateToItemDetail(message);
+      },
     );
     _firebaseMessaging.requestNotificationPermissions(
         const IosNotificationSettings(sound: true, badge: true, alert: true));
