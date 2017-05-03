@@ -82,6 +82,19 @@ class FirebaseMessaging {
     return _token != null ? new Future.value(_token) : onTokenRefresh.first;
   }
 
+  /// Subscribe to topic in background.
+  ///
+  /// [topic] must match the following regular expression:
+  /// "[a-zA-Z0-9-_.~%]{1,900}".
+  void subscribeToTopic(String topic) {
+    _channel.invokeMethod('subscribeToTopic', topic);
+  }
+
+  /// Unsubscribe from topic in background.
+  void unsubscribeFromTopic(String topic) {
+    _channel.invokeMethod('unsubscribeFromTopic', topic);
+  }
+
   Future<Null> _handleMethod(MethodCall call) async {
     switch (call.method) {
       case "onToken":

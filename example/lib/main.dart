@@ -87,7 +87,11 @@ class PushMessagingExample extends StatefulWidget {
 
 class _PushMessagingExampleState extends State<PushMessagingExample> {
   String _homeScreenText = "Waiting for token...";
+  bool _topicButtonsDisabled = false;
+
   final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+  final TextEditingController _topicController =
+      new TextEditingController(text: 'topic');
 
   Future<Null> _showItemDialog(Map<String, dynamic> message) async {
     Item item = _itemForMessage(message);
@@ -167,9 +171,52 @@ class _PushMessagingExampleState extends State<PushMessagingExample> {
           child: new Icon(Icons.message),
         ),
         body: new Material(
-            child: new Center(
-          child: new Text(_homeScreenText),
-        )));
+          child: new Column(
+            children: [
+              new Center(
+                child: new Text(_homeScreenText),
+              ),
+              new Row(children: [
+                new Expanded(
+                  child: new TextField(
+                      controller: _topicController,
+                      onChanged: (String v) {
+                        setState(() {
+                          _topicButtonsDisabled = v.length == 0;
+                        });
+                      }),
+                ),
+                new FlatButton(
+                  child: new Text("subscribe"),
+                  onPressed: _topicButtonsDisabled
+                      ? null
+                      : () {
+                          _firebaseMessaging
+                              .subscribeToTopic(_topicController.text);
+                          _clearTopicText();
+                        },
+                ),
+                new FlatButton(
+                  child: new Text("unsubscribe"),
+                  onPressed: _topicButtonsDisabled
+                      ? null
+                      : () {
+                          _firebaseMessaging
+                              .unsubscribeFromTopic(_topicController.text);
+                          _clearTopicText();
+                        },
+                ),
+              ])
+            ],
+          ),
+        ));
+  }
+
+  void _clearTopicText() {
+    setState(() {
+      _topicController.text = "";
+      _topicButtonsDisabled = true;
+    });
   }
 }
 

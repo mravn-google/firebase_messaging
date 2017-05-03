@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
@@ -59,9 +60,17 @@ public class FirebaseMessagingPlugin extends BroadcastReceiver implements Method
 
   @Override
   public void onMethodCall(MethodCall call, Result result) {
-    if (call.method.equals("configure")) {
+    if ("configure".equals(call.method)) {
       FlutterFirebaseInstanceIDService.broadcastToken(activity);
       sendMessageFromIntent("onLaunch", activity.getIntent());
+      result.success(null);
+    } else if ("subscribeToTopic".equals(call.method)) {
+      String topic = call.arguments();
+      FirebaseMessaging.getInstance().subscribeToTopic(topic);
+      result.success(null);
+    } else if ("unsubscribeFromTopic".equals(call.method)) {
+      String topic = call.arguments();
+      FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
       result.success(null);
     } else {
       result.notImplemented();

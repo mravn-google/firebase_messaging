@@ -33,17 +33,17 @@
                                            binaryMessenger:controller];
     __unsafe_unretained typeof(self) weakSelf = self;
     [_channel setMethodCallHandler:^(FlutterMethodCall *call, FlutterResult result) {
-      [weakSelf handleMethodCall:call.method arguments:call.arguments result:result];
+      [weakSelf handleMethodCall:call result:result];
     }];
   }
   return self;
 }
 
-- (void)handleMethodCall:(NSString *)method
-               arguments:(NSDictionary *)arguments
-                  result:(FlutterResult)result {
+- (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
+  NSString *method = call.method;
   if ([@"requestNotificationPermissions" isEqualToString:method]) {
     UIUserNotificationType notificationTypes = 0;
+    NSDictionary *arguments = call.arguments;
     if (arguments[@"sound"]) {
       notificationTypes |= UIUserNotificationTypeSound;
     }
@@ -63,6 +63,14 @@
     if (_launchNotification != nil) {
       [_channel invokeMethod:@"onLaunch" arguments:_launchNotification];
     }
+    result(nil);
+  } else if ([@"subscribeToTopic" isEqualToString:method]) {
+    NSString *topic = call.arguments;
+    [[FIRMessaging messaging] subscribeToTopic:topic];
+    result(nil);
+  } else if ([@"unsubscribeFromTopic" isEqualToString:method]) {
+    NSString *topic = call.arguments;
+    [[FIRMessaging messaging] unsubscribeFromTopic:topic];
     result(nil);
   } else {
     result(FlutterMethodNotImplemented);

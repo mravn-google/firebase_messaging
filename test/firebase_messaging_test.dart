@@ -124,6 +124,18 @@ void main() {
     await handler(new MethodCall('onResume', onResumeMessage));
     expect(await onResume.future, onResumeMessage);
   });
+
+  const String myTopic = 'Flutter';
+
+  test('subscribe to topic', () {
+    firebaseMessaging.subscribeToTopic(myTopic);
+    verify(mockChannel.invokeMethod('subscribeToTopic', myTopic));
+  });
+
+  test('unsubscribe from topic', () {
+    firebaseMessaging.unsubscribeFromTopic(myTopic);
+    verify(mockChannel.invokeMethod('unsubscribeFromTopic', myTopic));
+  });
 }
 
 class MockMethodChannel extends Mock implements MethodChannel {}
