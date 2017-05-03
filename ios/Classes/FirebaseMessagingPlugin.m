@@ -6,6 +6,11 @@
 
 #import "Firebase/Firebase.h"
 
+#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+@interface FirebaseMessagingPlugin ()<FIRMessagingDelegate>
+@end
+#endif
+
 @implementation FirebaseMessagingPlugin {
   FlutterMethodChannel *_channel;
   NSDictionary *_launchNotification;
@@ -19,6 +24,7 @@
     if (![FIRApp defaultApp]) {
       [FIRApp configure];
     }
+    [FIRMessaging messaging].remoteMessageDelegate = self;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(tokenRefreshNotification:)
                                                  name:kFIRInstanceIDTokenRefreshNotification
@@ -92,6 +98,13 @@
     [_channel invokeMethod:@"onMessage" arguments:userInfo];
   }
 }
+
+#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+// Receive data message on iOS 10 devices while app is in the foreground.
+- (void)applicationReceivedRemoteMessage:(FIRMessagingRemoteMessage *)remoteMessage {
+  [self didReceiveRemoteNotification:remoteMessage.appData];
+}
+#endif
 
 - (void)connectToFcm {
   // Won't connect since there is no token
