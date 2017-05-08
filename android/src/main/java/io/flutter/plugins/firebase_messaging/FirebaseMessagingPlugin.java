@@ -4,6 +4,7 @@
 
 package io.flutter.plugins.firebase_messaging;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,36 +13,37 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.RemoteMessage;
-import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugin.common.PluginRegistry.Registrar;
 import java.util.HashMap;
 import java.util.Map;
 
 /** FirebaseMessagingPlugin */
 public class FirebaseMessagingPlugin extends BroadcastReceiver implements MethodCallHandler {
-  private final FlutterActivity activity;
+  private final Activity activity;
   private final MethodChannel channel;
 
   private static final String CLICK_ACTION_VALUE = "FLUTTER_NOTIFICATION_CLICK";
 
-  public static FirebaseMessagingPlugin register(FlutterActivity activity) {
-    return new FirebaseMessagingPlugin(activity);
-  }
-
-  private FirebaseMessagingPlugin(FlutterActivity activity) {
-    this.activity = activity;
-    FirebaseApp.initializeApp(activity);
-    this.channel = new MethodChannel(activity.getFlutterView(), "firebase_messaging");
-    this.channel.setMethodCallHandler(this);
+  public static void registerWith(Registrar registrar) {
+    final MethodChannel channel = new MethodChannel(registrar.messenger(), "firebase_messaging");
+    final FirebaseMessagingPlugin instance = new FirebaseMessagingPlugin(registrar.activity(), channel);
+    FirebaseApp.initializeApp(registrar.activity());
+    channel.setMethodCallHandler(instance);
 
     IntentFilter intentFilter = new IntentFilter();
     intentFilter.addAction(FlutterFirebaseInstanceIDService.ACTION_TOKEN);
     intentFilter.addAction(FlutterFirebaseMessagingService.ACTION_REMOTE_MESSAGE);
-    LocalBroadcastManager manager = LocalBroadcastManager.getInstance(activity);
-    manager.registerReceiver(this, intentFilter);
+    LocalBroadcastManager manager = LocalBroadcastManager.getInstance(registrar.activity());
+    manager.registerReceiver(instance, intentFilter);
+  }
+
+  private FirebaseMessagingPlugin(Activity activity, MethodChannel channel) {
+    this.activity = activity;
+    this.channel = channel;
   }
 
   // BroadcastReceiver implementation.
